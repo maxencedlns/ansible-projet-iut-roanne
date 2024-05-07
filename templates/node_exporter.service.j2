@@ -1,0 +1,11 @@
+Description=Node_Exporter
+Wants=network-online.target
+After=network-online.target
+
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart= /usr/local/bin/node_exporter
+
+WantedBy=multi-user.target
+

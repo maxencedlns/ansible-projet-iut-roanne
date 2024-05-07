@@ -1,0 +1,63 @@
+---
+- name: Installation de PostgreSQL + replication
+  hosts: bdd
+  become: yes
+
+  tasks:
+    - name: Mise a jour APT
+      apt:
+       update_cache: yes
+
+    - name: Installation de PostgreSQL
+      apt:
+       name: postgresql
+       state: present
+      become: yes
+
+    - name: Configuration du fichier conf postgresql sur le noeud maitre
+      template:
+        src: postgresql.conf.j2
+        dest: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf
+      become: yes
+      when: inventory_hostname == 'bdd1'
+
+    - name: Configuration du fichier conf postgresql sur le noeud slave
+      template:
+        src: postgresql1.conf.j2
+        dest: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf
+      become: yes
+      when: inventory_hostname == 'bdd2'
+
+    - name: Configuration du fichier de replication sur le master
+      template:
+        src: pg_hba.conf.j2
+        dest: /etc/postgresql/{{ postgres_version }}/main/pg_hba.confg
+      become: yes
+      when: inventory_hostname == 'bdd1'
+
+    - name: Configuration du fichier de replication sur le slave
+      template:
+        src: pg_hba1.conf.j2
+        dest: /etc/postgresql/{{ postgres_version }}/main/pg_hba.confg
+      become: yes
+      when: inventory_hostname == 'bdd2'
+
+    - name: Demarrage et activation de PostgreSQL
+      command: "{{ 'service postgresql start' }}"
+      become: yes
+
+    #- name: Creation de l'utilisateur de replication
+     # become: yes
+     # postgresql_user:
+      #  name: replica
+       # password: replica
+     #   login_user: postgres
+      #  login_password: postgres
+       # role_attr_flags: REPLICATION
+        #login_unix_socket: /var/run/postgresql/
+
+    - name: Redemarrage du service PostgreSQL
+      command: "{{ 'service postgresql restart' }}"
+      become: yes
+
+

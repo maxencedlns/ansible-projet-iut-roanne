@@ -1,0 +1,12 @@
+#Conf replication
+listen_addresses = '*'
+max_connections = 100
+
+data_directory = '/var/lib/postgresql/15/main'
+wal_level = replica
+max_wal_senders = 5
+archive_mode = on
+archive_command = 'cp %p /var/lib/postgresql/15/main/archives/%f'
+
+primary_conninfo = 'host=172.17.0.7 port=5432 user=replica password=replica'
+

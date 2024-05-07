@@ -1,0 +1,6 @@
+#Conf replication
+listen_addresses = '*'
+data_directory = '/var/lib/postgresql/15/main'
+hot_standby = on
+wal_level = replica
+max_wal_senders = 5

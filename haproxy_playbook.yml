@@ -1,0 +1,25 @@
+---
+- name: Installation et configuration de HaProxy
+  hosts: loadbalancer
+  become: true
+
+  tasks:
+    - name: Mettre a jour les paquets apt
+      apt:
+        update_cache: yes
+
+    - name: Installer HaProxy
+      apt:
+        name: haproxy
+        state: present
+
+    - name: Copie le fichier de configuration HaProxy
+      template:
+        src: templates/haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+      notify:
+        - redemarrage d'haproxy
+
+  handlers:
+    - name: redemarrage d'haproxy
+      command: "{{ 'service haproxy reload' }}"

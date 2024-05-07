@@ -1,0 +1,14 @@
+---
+- name: Mises a jour de l'OS
+  hosts: all
+  become: yes
+  tasks:
+    - name: apt update
+      apt:
+        update_cache: yes
+
+    - name: apt upgrade
+      apt:
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes

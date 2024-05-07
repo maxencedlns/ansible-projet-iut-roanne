@@ -1,0 +1,57 @@
+---
+- name: Serveurs de backup
+  hosts: all
+  vars:
+    backup_dir: "/backup"
+
+- name: Sauvegarde des serveurs WEB
+  hosts: web
+  vars:
+    backup_dir: "/backup"
+  tasks:
+    - name: Sauvegarde du contenu
+      shell: "cp -r /var/www/html/ {{ backup_dir }}/sauvegarde_web"
+
+- name: Sauvegarde des BDD
+  hosts: bdd
+  vars:
+    backup_dir: "/backup"
+  tasks:
+    - name: Sauvegarde BDD
+      become: yes
+      become_user: postgres
+      shell: "pg_dumpall -U postgres > {{ backup_dir }}/sauvegarde_bdd.sql"
+
+- name: Transfert au node pour WEB
+  hosts: node-manager
+  tasks:
+    - name: Transfert du contenu web
+      synchronize:
+        src: "/backup/sauvegarde_web"
+        dest: "/backup/sauvegarde_web1"
+        mode: push
+      delegate_to: web1
+
+    - name: Transfert du contenu web
+      synchronize:
+        src: "/backup/sauvegarde_web"
+        dest: "/backup/sauvegarde_web2"
+        mode: push
+      delegate_to: web2
+
+- name: Transfert au node pour BDD
+  hosts: node-manager
+  tasks:
+    - name: Transfert du contenu POstgreSQL
+      synchronize:
+        src: "/backup/sauvegarde_bdd.sql"
+        dest: "/backup/sauvegarde_bdd1/sauvegarde_bdd.sql"
+        mode: push
+      delegate_to: bdd1
+
+    - name: Transfert du contenu POstgreSQL
+      synchronize:
+        src: "/backup/sauvegarde_bdd.sql"
+        dest: "/backup/sauvegarde_bdd2/sauvegarde_bdd.sql"
+        mode: push
+      delegate_to: bdd2

@@ -1,0 +1,28 @@
+---
+- name: Installer et configurer Apache
+  hosts: web
+  become: yes
+
+  tasks:
+   - name: Mettre a jour le cache apt
+     apt:
+       update_cache: yes
+     when: ansible_os_family == 'Debian'
+
+   - name: Installer Apache
+     package:
+       name: apache2
+       state: present
+
+   - name: Demarrer le service Apache
+     command: "{{ 'service apache2 start' }} "
+
+   - name: Copier le fichier de configuration Apache
+     template:
+       src: templates/apache2.conf.j2
+       dest: /etc/apache2/apache2.conf
+     notify: Relancement d'Apache
+
+  handlers:
+   - name: Relancement d'Apache
+     command: "{{ 'service apache2 reload' }}"
